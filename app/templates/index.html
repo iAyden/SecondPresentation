@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalla de Personajes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Batalla de Personajes</h1>
+
+        <!-- Formulario para crear un equipo -->
+        <div class="form-group">
+            <label for="nombreEquipo">Nombre del Equipo:</label>
+            <input type="text" id="nombreEquipo" placeholder="Ej: Equipo A">
+            <button onclick="crearEquipo()">Crear Equipo</button>
+        </div>
+
+        <!-- Formulario para agregar un personaje a un equipo -->
+        <div class="form-group">
+            <label for="equipoID">Seleccionar Equipo:</label>
+            <select id="equipoID">
+                <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+            </select>
+            <label for="personajeID">Seleccionar Personaje:</label>
+            <select id="personajeID">
+                <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+            </select>
+            <button onclick="agregarPersonaje()">Agregar Personaje al Equipo</button>
+        </div>
+        <div class="form-group">
+            <label for="equipo1ID">Seleccionar Equipo 1:</label>
+            <select id="equipo1ID">
+                <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="equipo2ID">Seleccionar Equipo 2:</label>
+            <select id="equipo2ID">
+                <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+            </select>
+        </div>
+        <!-- Botón para simular batalla -->
+        <div class="form-group">
+            <button onclick="simularBatalla()">Simular Batalla</button>
+        </div>
+
+        <!-- Tabla para mostrar resultados -->
+        <h2>Resultados de la Batalla</h2>
+        <table id="tablaResultados">
+            <thead>
+                <tr>
+                    <th>Equipo</th>
+                    <th>Poder Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los resultados se llenarán dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Cargar equipos y personajes al iniciar la página
+        document.addEventListener("DOMContentLoaded", function () {
+            cargarEquipos();
+            cargarPersonajes();
+        });
+
+        // Función para cargar equipos desde el backend
+        async function cargarEquipos() {
+    const response = await fetch("/equipos");
+    const equipos = await response.json();
+    const select1 = document.getElementById("equipo1ID");
+    const select2 = document.getElementById("equipo2ID");
+    select1.innerHTML = equipos.map(e => `<option value="${e.ID}">${e.Nombre}</option>`).join("");
+    select2.innerHTML = equipos.map(e => `<option value="${e.ID}">${e.Nombre}</option>`).join("");
+}
+
+        // Función para cargar personajes desde el backend
+        async function cargarPersonajes() {
+            const response = await fetch("/personajes");
+            const personajes = await response.json();
+            const select = document.getElementById("personajeID");
+            select.innerHTML = personajes.map(p => `<option value="${p.ID}">${p.Nombre}</option>`).join("");
+        }
+
+        // Función para crear un equipo
+        async function crearEquipo() {
+            const nombre = document.getElementById("nombreEquipo").value;
+            if (!nombre) {
+                alert("Por favor, ingresa un nombre para el equipo.");
+                return;
+            }
+            await fetch("/equipos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre: nombre })
+            });
+            alert("Equipo creado exitosamente.");
+            cargarEquipos();  // Recargar la lista de equipos
+        }
+
+        // Función para agregar un personaje a un equipo
+        async function agregarPersonaje() {
+            const equipoID = document.getElementById("equipoID").value;
+            const personajeID = document.getElementById("personajeID").value;
+            await fetch(`/equipos/${equipoID}/agregar_personaje`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ personaje_id: personajeID })
+            });
+            alert("Personaje agregado al equipo exitosamente.");
+        }
+
+        async function simularBatalla() {
+    const equipo1ID = document.getElementById("equipo1ID").value;
+    const equipo2ID = document.getElementById("equipo2ID").value;
+
+    if (!equipo1ID || !equipo2ID) {
+        alert("Por favor, selecciona dos equipos.");
+        return;
+    }
+
+    const response = await fetch("/batalla", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ equipo1_id: equipo1ID, equipo2_id: equipo2ID })
+    });
+
+    const resultado = await response.json();
+
+    // Obtener los nombres de los equipos
+    const equipos = await fetch("/equipos").then(res => res.json());
+    const nombreEquipo1 = equipos.find(e => e.ID == equipo1ID).Nombre;
+    const nombreEquipo2 = equipos.find(e => e.ID == equipo2ID).Nombre;
+
+    // Mostrar resultados en la tabla
+    const tabla = document.getElementById("tablaResultados").getElementsByTagName("tbody")[0];
+    tabla.innerHTML = `
+        <tr>
+            <td>${nombreEquipo1}</td>
+            <td>${resultado.PoderEquipo1}</td>
+        </tr>
+        <tr>
+            <td>${nombreEquipo2}</td>
+            <td>${resultado.PoderEquipo2}</td>
+        </tr>
+    `;
+
+    // Mostrar el ganador
+    const ganadorNombre = resultado.Ganador == equipo1ID ? nombreEquipo1 : nombreEquipo2;
+    alert(`El ganador es: ${ganadorNombre}`);
+}
+    </script>
+</body>
+</html>
