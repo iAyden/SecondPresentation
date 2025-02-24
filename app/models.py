@@ -15,7 +15,7 @@ class Equipo:
     def __init__(self, id, nombre):
         self.id = id
         self.nombre = nombre
-        self.miembros = []  # Lista de personajes
+        self.miembros = [] 
 
     def agregar_personaje(self, personaje):
         self.miembros.append(personaje)
