@@ -1,5 +1,4 @@
 from db_manager import obtener_personajes_por_equipo, guardar_batalla
-
 class Batalla:
     def __init__(self, equipo1_id, equipo2_id):
         self.equipo1_id = equipo1_id

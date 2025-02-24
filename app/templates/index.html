@@ -72,7 +72,7 @@
         <div class="form-group">
             <label for="equipoID">Seleccionar Equipo:</label>
             <select id="equipoID">
-                <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+                
             </select>
             <label for="personajeID">Seleccionar Personaje:</label>
             <select id="personajeID">
@@ -123,8 +123,10 @@
         async function cargarEquipos() {
     const response = await fetch("/equipos");
     const equipos = await response.json();
+    const selectteam = document.getElementById("equipoID")
     const select1 = document.getElementById("equipo1ID");
     const select2 = document.getElementById("equipo2ID");
+    selectteam.innerHTML = equipos.map(e => `<option value ="${e.ID}">${e.Nombre}</option>`).join("");
     select1.innerHTML = equipos.map(e => `<option value="${e.ID}">${e.Nombre}</option>`).join("");
     select2.innerHTML = equipos.map(e => `<option value="${e.ID}">${e.Nombre}</option>`).join("");
 }
